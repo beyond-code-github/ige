@@ -960,6 +960,7 @@ var IgeEntity = IgeObject.extend({
 	highlight: function (val) {
 		if (val !== undefined) {
 			this._highlight = val;
+            this.cacheDirty(true);
 			return this;
 		}
 
@@ -1644,7 +1645,7 @@ var IgeEntity = IgeObject.extend({
 	 * chain but have already transformed the entity in a previous overloaded
 	 * method.
 	 */
-	tick: function (ctx, dontTransform) {
+	tick: function (ctx, dontRender) {
 		if (!this._hidden && this._inView && (!this._parent || (this._parent._inView)) && !this._streamJustCreated) {
 			// Process any behaviours assigned to the entity
 			this._processTickBehaviours(ctx);
@@ -1664,13 +1665,13 @@ var IgeEntity = IgeObject.extend({
 				}
 			}
 
-			if (!this._dontRender) {
+			if (!dontRender) {
 				// Check for cached version
 				if (this._cache || this._compositeCache) {
 					// Caching is enabled
 					if (this._cacheDirty) {
 						// The cache is dirty, redraw it
-						this._refreshCache(dontTransform);
+						this._refreshCache();
 					}
 					
 					// Now render the cached image data to the main canvas
@@ -1678,12 +1679,10 @@ var IgeEntity = IgeObject.extend({
 				} else {
 					// Non-cached output
 					// Transform the context by the current transform settings
-					if (!dontTransform) {
-						this._transformContext(ctx);
-					}
-					
+					this._transformContext(ctx);
+
 					// Render the entity
-					this._renderEntity(ctx, dontTransform);
+					this._renderEntity(ctx);
 				}
 			}
 
@@ -1695,13 +1694,16 @@ var IgeEntity = IgeObject.extend({
 			if (this._compositeCache) {
 				if (this._cacheDirty) {
 					// Process children
-					IgeObject.prototype.tick.call(this, this._cacheCtx);
+					IgeObject.prototype.tick.call(this, this._cacheCtx, false);
 					this._renderCache(ctx);
 					this._cacheDirty = false;
 				}
+				else {
+                    IgeObject.prototype.tick.call(this, this._cacheCtx, true);
+				}
 			} else {
 				// Process children
-				IgeObject.prototype.tick.call(this, ctx);
+				IgeObject.prototype.tick.call(this, ctx, dontRender);
 			}
 		}
 	},
@@ -1739,7 +1741,7 @@ var IgeEntity = IgeObject.extend({
 		return false;
 	},
 	
-	_refreshCache: function (dontTransform) {
+	_refreshCache: function () {
 		// The cache is not clean so re-draw it
 		// Render the entity to the cache
 		var _canvas = this._cacheCanvas,
@@ -1785,13 +1787,10 @@ var IgeEntity = IgeObject.extend({
 			
 			this._cacheDirty = false;
 		}
-		
+
 		// Transform the context by the current transform settings
-		if (!dontTransform) {
-			this._transformContext(_ctx);
-		}
-		
-		this._renderEntity(_ctx, dontTransform);
+		this._transformContext(_ctx);
+		this._renderEntity(_ctx);
 	},
 
 	/**
@@ -3189,6 +3188,8 @@ var IgeEntity = IgeObject.extend({
 			this._transformChanged = true;
 			this._aabbDirty = true;
 			this._bounds3dPolygonDirty = true;
+
+			this.cacheDirty(true);
 		} else {
 			this._transformChanged = false;
 		}
