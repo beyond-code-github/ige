@@ -1661,18 +1661,16 @@ var IgeObject = IgeEventingClass.extend({
 	 * @private
 	 */
 	_resizeEvent: function (event) {
-		var arr = this._children,
-			arrCount;
-
-		if (arr) {
-			arrCount = arr.length;
-
-			while (arrCount--) {
-				arr[arrCount]._resizeEvent(event);
-			}
-		}
-
-
+		// var arr = this._children,
+		// 	arrCount;
+        //
+		// if (arr) {
+		// 	arrCount = arr.length;
+        //
+		// 	while (arrCount--) {
+		// 		arr[arrCount]._resizeEvent(event);
+		// 	}
+		// }
 	},
 
 	/**
