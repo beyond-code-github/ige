@@ -532,7 +532,8 @@ var IgePathComponent = IgeEventingClass.extend({
 				pointFrom,
 				pointTo,
 				newPoint,
-				dynamicResult;
+				dynamicResult,
+				effectiveTime;
 			
 			// Loop points along the path and determine which points we are traversing between
 			for (pointIndex = 0; pointIndex < pointCount; pointIndex++) {
@@ -552,8 +553,11 @@ var IgePathComponent = IgeEventingClass.extend({
 			// Check if we have points to traverse between
 			if (pointFrom && pointTo) {
 				if (path._currentPointFrom !== path._previousPointFrom) {
-					// Emit point complete
-					path.emit('pointComplete', [this, pointArr[path._previousPointFrom].x, pointArr[path._previousPointFrom].y, pointArr[path._currentPointFrom].x, pointArr[path._currentPointFrom].y]);
+                    // Emit points complete
+					for (var p = path._previousPointFrom; p < path._currentPointFrom; p++) {
+                        effectiveTime = path._startTime + pointArr[p]._absoluteTimeToNext;
+                        path.emit('pointComplete', [this, pointArr[p].x, pointArr[p].y, pointArr[p + 1].x, pointArr[p + 1].y, effectiveTime]);
+                    }
 				}
 				
 				// Check if we are in dynamic mode and if so, ensure our path is still valid
@@ -595,11 +599,18 @@ var IgePathComponent = IgeEventingClass.extend({
 				
 				newPoint = path.multiplyPoint(pointTo);
 				newPoint = path.transformPoint(newPoint);
+
+                path._currentPointFrom = pointCount - 1;
+                path._currentPointTo = pointCount - 1;
+
+                // Emit final points complete if remaining
+                for (var p = path._previousPointFrom; p < path._currentPointFrom; p++) {
+                    effectiveTime = path._startTime + pointArr[p]._absoluteTimeToNext;
+                    path.emit('pointComplete', [this, pointArr[p].x, pointArr[p].y, pointArr[p + 1].x, pointArr[p + 1].y, effectiveTime]);
+                }
 				
 				path._previousPointFrom = pointCount - 1;
 				path._previousPointTo = pointCount - 1;
-				path._currentPointFrom = pointCount - 1;
-				path._currentPointTo = pointCount - 1;
 				
 				this.translateToPoint(newPoint);
 				
