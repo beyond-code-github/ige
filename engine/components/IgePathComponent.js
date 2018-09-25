@@ -408,9 +408,12 @@ var IgePathComponent = IgeEventingClass.extend({
 
             this._calculatePathData();
 
-            if (this._points.length > 0) {
-                startPoint = this._points[0];
+            if (this._points.length > 1) {
                 this._nextPointToProcess = 0;
+                this._currentPointFrom = 0;
+                this._currentPointTo = 1;
+
+                startPoint = this._points[0];
                 this.emit("started", [this._entity, startPoint.x, startPoint.y, this._startTime]);
             }
         } else {
@@ -434,6 +437,11 @@ var IgePathComponent = IgeEventingClass.extend({
             if (!this._active) {
                 this._active = true;
                 this._startTime = startTime || ige._currentTime;
+
+                if (this._points.length > 1) {
+                    this._currentPointFrom = this._nextPointToProcess;
+                    this._currentPointTo = this._nextPointToProcess + 1;
+                }
             }
         }
 
