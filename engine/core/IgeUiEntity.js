@@ -326,7 +326,7 @@ var IgeUiEntity = IgeEntity.extend([
 			}
 	
 			ctx.translate(this._paddingLeft, this._paddingTop);
-			IgeEntity.prototype.tick.call(this, ctx, true);
+			IgeEntity.prototype.tick.call(this, ctx);
 		}
 	},
 
@@ -336,7 +336,6 @@ var IgeUiEntity = IgeEntity.extend([
 	 * @private
 	 */
 	_resizeEvent: function (event) {
-		
 		if (this._updateUiPosition) {
 			this._updateUiPosition();
 		} else {
@@ -346,7 +345,17 @@ var IgeUiEntity = IgeEntity.extend([
 		if (this._updateStyle) {
 			this._updateStyle();
 		}
-		IgeEntity.prototype._resizeEvent.call(this, event);
+
+		var arr = this._children,
+			arrCount;
+
+		if (arr) {
+			arrCount = arr.length;
+
+			while (arrCount--) {
+				arr[arrCount]._resizeEvent(event);
+			}
+		}
 	}
 });
 
