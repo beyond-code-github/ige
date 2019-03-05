@@ -41,8 +41,8 @@ var IgeEntity = IgeObject.extend({
 		
 		this._velocity = new IgePoint3d(0, 0, 0);
 
-        this._localMatrix = new IgeMatrix2d();
-        this._worldMatrix = new IgeMatrix2d();
+		this._localMatrix = new IgeMatrix2d();
+		this._worldMatrix = new IgeMatrix2d();
 		this._oldWorldMatrix = new IgeMatrix2d();
 
 		this._inView = true;
@@ -1638,13 +1638,15 @@ var IgeEntity = IgeObject.extend({
 	/**
 	 * Processes the actions required each render frame.
 	 * @param {CanvasRenderingContext2D} ctx The canvas context to render to.
+	 * @param {Boolean} dontRender If set to true, the tick method will process mouse events for this entity and it's
+	 * children, but will not render them. This is used when caching composite entities.
 	 * @param {Boolean} dontTransform If set to true, the tick method will
 	 * not transform the context based on the entity's matrices. This is useful
 	 * if you have extended the class and want to process down the inheritance
 	 * chain but have already transformed the entity in a previous overloaded
 	 * method.
 	 */
-	tick: function (ctx, dontTransform) {
+	tick: function (ctx, dontRender, dontTransform) {
 		if (!this._hidden && this._inView && (!this._parent || (this._parent._inView)) && !this._streamJustCreated) {
 			// Process any behaviours assigned to the entity
 			this._processTickBehaviours(ctx);
@@ -1664,7 +1666,7 @@ var IgeEntity = IgeObject.extend({
 				}
 			}
 
-			if (!this._dontRender) {
+			if (!dontRender) {
 				// Check for cached version
 				if (this._cache || this._compositeCache) {
 					// Caching is enabled
@@ -1695,13 +1697,17 @@ var IgeEntity = IgeObject.extend({
 			if (this._compositeCache) {
 				if (this._cacheDirty) {
 					// Process children
-					IgeObject.prototype.tick.call(this, this._cacheCtx);
+					IgeObject.prototype.tick.call(this, this._cacheCtx, dontRender);
 					this._renderCache(ctx);
 					this._cacheDirty = false;
 				}
+				else {
+					// Process children but don't render them as they're already in the composite cache
+					IgeObject.prototype.tick.call(this, this._cacheCtx, true);
+				}
 			} else {
-				// Process children
-				IgeObject.prototype.tick.call(this, ctx);
+				// Process children passing dontRender flag whatever it's state
+				IgeObject.prototype.tick.call(this, ctx, dontRender);
 			}
 		}
 	},
@@ -3907,7 +3913,7 @@ var IgeEntity = IgeObject.extend({
 			// Mark the client as having received a destroy
 			// command for this entity
 			ige.network.stream._streamClientCreated[thisId][clientId] = false;
-            ige.network.stream._streamClientData[thisId][clientId] = undefined;
+			ige.network.stream._streamClientData[thisId][clientId] = undefined;
 		} else {
 			// Mark all clients as having received this destroy
 			arr = ige.network.clients();
@@ -3915,7 +3921,7 @@ var IgeEntity = IgeObject.extend({
 			for (i in arr) {
 				if (arr.hasOwnProperty(i)) {
 					ige.network.stream._streamClientCreated[thisId][i] = false;
-                    ige.network.stream._streamClientData[thisId][i] = undefined;
+					ige.network.stream._streamClientData[thisId][i] = undefined;
 				}
 			}
 		}
