@@ -300,7 +300,7 @@ var IgeUiEntity = IgeEntity.extend([
 		return ret;
 	},
 
-	tick: function (ctx, dontTransform) {
+	tick: function (ctx, dontRender, dontTransform) {
 		if (!this._hidden && this._inView && (!this._parent || (this._parent._inView)) && !this._streamJustCreated) {
 			if (!dontTransform) {
 				this._transformContext(ctx);
@@ -326,7 +326,7 @@ var IgeUiEntity = IgeEntity.extend([
 			}
 	
 			ctx.translate(this._paddingLeft, this._paddingTop);
-			IgeEntity.prototype.tick.call(this, ctx, true);
+			IgeEntity.prototype.tick.call(this, ctx, dontRender, true);
 		}
 	},
 
