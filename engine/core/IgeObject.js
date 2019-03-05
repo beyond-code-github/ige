@@ -1570,7 +1570,7 @@ var IgeObject = IgeEventingClass.extend({
 	/**
 	 * Processes the actions required each render frame.
 	 */
-	tick: function (ctx) {
+	tick: function (ctx, dontRender) {
 		// Check that we are alive before processing further
 		if (this._alive) {
 			var arr = this._children,
@@ -1598,7 +1598,7 @@ var IgeObject = IgeEventingClass.extend({
 						if (!arr[arrCount]._newBorn) {
 							ctx.save();
 							ts = new Date().getTime();
-							arr[arrCount].tick(ctx);
+							arr[arrCount].tick(ctx, dontRender);
 							td = new Date().getTime() - ts;
 							if (arr[arrCount]) {
 								if (!ige._timeSpentInTick[arr[arrCount].id()]) {
@@ -1624,7 +1624,7 @@ var IgeObject = IgeEventingClass.extend({
 						
 						if (!arr[arrCount]._newBorn) {
 							ctx.save();
-							arr[arrCount].tick(ctx);
+							arr[arrCount].tick(ctx, dontRender);
 							ctx.restore();
 						}
 					}
