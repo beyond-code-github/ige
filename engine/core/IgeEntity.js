@@ -1170,33 +1170,33 @@ var IgeEntity = IgeObject.extend({
 			this.localToWorld(poly._poly, null, inverse);
 
 			// Get the extents of the newly transformed poly
-			minX = Math.min(
+			minX = Math.round(Math.min(
 				poly._poly[0].x,
 				poly._poly[1].x,
 				poly._poly[2].x,
 				poly._poly[3].x
-			);
+			));
 
-			minY = Math.min(
+			minY = Math.round(Math.min(
 				poly._poly[0].y,
 				poly._poly[1].y,
 				poly._poly[2].y,
 				poly._poly[3].y
-			);
+			));
 
-			maxX = Math.max(
+			maxX = Math.round(Math.max(
 				poly._poly[0].x,
 				poly._poly[1].x,
 				poly._poly[2].x,
 				poly._poly[3].x
-			);
+			));
 
-			maxY = Math.max(
+			maxY = Math.round(Math.max(
 				poly._poly[0].y,
 				poly._poly[1].y,
 				poly._poly[2].y,
 				poly._poly[3].y
-			);
+			));
 
 			box = new IgeRect(minX, minY, maxX - minX, maxY - minY);
 
