@@ -207,15 +207,15 @@ var IgeInputComponent = IgeEventingClass.extend({
 		};
 
 		// Listen for mouse events
-		canvas.addEventListener('mousedown', this._evRef.mousedown, false);
-		canvas.addEventListener('mouseup', this._evRef.mouseup, false);
-		canvas.addEventListener('mousemove', this._evRef.mousemove, false);
+		// canvas.addEventListener('mousedown', this._evRef.mousedown, false);
+		// canvas.addEventListener('mouseup', this._evRef.mouseup, false);
+		// canvas.addEventListener('mousemove', this._evRef.mousemove, false);
 		canvas.addEventListener('mousewheel', this._evRef.mousewheel, false);
 
 		// Touch events
-		canvas.addEventListener('touchmove', this._evRef.touchmove, false);
-		canvas.addEventListener('touchstart', this._evRef.touchstart, false);
-		canvas.addEventListener('touchend', this._evRef.touchend, false);
+		canvas.addEventListener('pointermove', this._evRef.touchmove, false);
+		canvas.addEventListener('pointerdown', this._evRef.touchstart, false);
+		canvas.addEventListener('pointerup', this._evRef.touchend, false);
 
 		// Kill the context menu on right-click, urgh!
 		canvas.addEventListener('contextmenu', this._evRef.contextmenu, false);
@@ -232,15 +232,15 @@ var IgeInputComponent = IgeEventingClass.extend({
 		var canvas = this._canvas;
 
 		// Listen for mouse events
-		canvas.removeEventListener('mousedown', this._evRef.mousedown, false);
-		canvas.removeEventListener('mouseup', this._evRef.mouseup, false);
-		canvas.removeEventListener('mousemove', this._evRef.mousemove, false);
+		// canvas.removeEventListener('mousedown', this._evRef.mousedown, false);
+		// canvas.removeEventListener('mouseup', this._evRef.mouseup, false);
+		// canvas.removeEventListener('mousemove', this._evRef.mousemove, false);
 		canvas.removeEventListener('mousewheel', this._evRef.mousewheel, false);
 
 		// Touch events
-		canvas.removeEventListener('touchmove', this._evRef.touchmove, false);
-		canvas.removeEventListener('touchstart', this._evRef.touchstart, false);
-		canvas.removeEventListener('touchend', this._evRef.touchend, false);
+		canvas.removeEventListener('pointermove', this._evRef.touchmove, false);
+		canvas.removeEventListener('pointerdown', this._evRef.touchstart, false);
+		canvas.removeEventListener('pointerup', this._evRef.touchend, false);
 
 		// Kill the context menu on right-click, urgh!
 		canvas.removeEventListener('contextmenu', this._evRef.contextmenu, false);
@@ -297,25 +297,25 @@ var IgeInputComponent = IgeEventingClass.extend({
 			}
 		}
 
-		if (event.igeType === 'touch') {
-			event.preventDefault();
-		}
+		// if (event.igeType === 'touch') {
+		// 	event.preventDefault();
+		// }
 
-		if (touch) {
-			event.button = 0; // Emulate left mouse button
+		// if (touch) {
+		// 	event.button = 0; // Emulate left mouse button
+		//
+		// 	// Handle touch changed
+		// 	if (event.changedTouches && event.changedTouches.length) {
+		// 		event.igePageX = event.changedTouches[0].pageX;
+		// 		event.igePageY = event.changedTouches[0].pageY;
+		// 	}
+		// } else {
+		// 	event.igePageX = event.pageX;
+		// 	event.igePageY = event.pageY;
+		// }
 
-			// Handle touch changed
-			if (event.changedTouches && event.changedTouches.length) {
-				event.igePageX = event.changedTouches[0].pageX;
-				event.igePageY = event.changedTouches[0].pageY;
-			}
-		} else {
-			event.igePageX = event.pageX;
-			event.igePageY = event.pageY;
-		}
-
-		event.igeX = (event.igePageX - ige._canvasPosition().left);
-		event.igeY = (event.igePageY - ige._canvasPosition().top);
+		event.igeX = (event.pageX - ige._canvasPosition().left);
+		event.igeY = (event.pageY - ige._canvasPosition().top);
 
 		this.emit('inputEvent', event);
 	},
@@ -351,9 +351,9 @@ var IgeInputComponent = IgeEventingClass.extend({
 
 		this.mouseDown = event;
 
-		if (!self.emit('preMouseDown', [event, mx, my, event.button + 1])) {
+		if (!self.emit('preMouseDown', [event, mx, my, event.button + 1, event.pointerId])) {
 			this.queueEvent(this, function () {
-				self.emit('mouseDown', [event, mx, my, event.button + 1]);
+				self.emit('mouseDown', [event, mx, my, event.button + 1, event.pointerId]);
 			});
 		}
 	},
@@ -388,9 +388,9 @@ var IgeInputComponent = IgeEventingClass.extend({
 
 		this.mouseUp = event;
 		
-		if (!self.emit('preMouseUp', [event, mx, my, event.button + 1])) {
+		if (!self.emit('preMouseUp', [event, mx, my, event.button + 1, event.pointerId])) {
 			this.queueEvent(this, function () {
-				self.emit('mouseUp', [event, mx, my, event.button + 1]);
+				self.emit('mouseUp', [event, mx, my, event.button + 1, event.pointerId]);
 			});
 		}
 	},
@@ -445,9 +445,9 @@ var IgeInputComponent = IgeEventingClass.extend({
 
 		this.mouseMove = event;
 
-		if (!self.emit('preMouseMove', [event, mx, my, event.button + 1])) {
+		if (!self.emit('preMouseMove', [event, mx, my, event.button + 1, event.pointerId])) {
 			this.queueEvent(this, function () {
-				self.emit('mouseMove', [event, mx, my, event.button + 1]);
+				self.emit('mouseMove', [event, mx, my, event.button + 1, event.pointerId]);
 			});
 		}
 	},
