@@ -165,6 +165,9 @@ var IgeInputComponent = IgeEventingClass.extend({
 		// Set default values for the mouse position
 		this._state[this.mouse.x] = 0;
 		this._state[this.mouse.y] = 0;
+
+		this.mouseDown = [];
+		this.mouseUp = [];
 	},
 
 	debug: function (val) {
@@ -216,6 +219,7 @@ var IgeInputComponent = IgeEventingClass.extend({
 		canvas.addEventListener('pointermove', this._evRef.touchmove, false);
 		canvas.addEventListener('pointerdown', this._evRef.touchstart, false);
 		canvas.addEventListener('pointerup', this._evRef.touchend, false);
+		canvas.addEventListener('pointercancel', this._evRef.touchend, false);
 
 		// Kill the context menu on right-click, urgh!
 		canvas.addEventListener('contextmenu', this._evRef.contextmenu, false);
@@ -241,6 +245,7 @@ var IgeInputComponent = IgeEventingClass.extend({
 		canvas.removeEventListener('pointermove', this._evRef.touchmove, false);
 		canvas.removeEventListener('pointerdown', this._evRef.touchstart, false);
 		canvas.removeEventListener('pointerup', this._evRef.touchend, false);
+		canvas.removeEventListener('pointercancel', this._evRef.touchend, false);
 
 		// Kill the context menu on right-click, urgh!
 		canvas.removeEventListener('contextmenu', this._evRef.contextmenu, false);
@@ -349,7 +354,7 @@ var IgeInputComponent = IgeEventingClass.extend({
 			this._state[this.mouse.button3] = true;
 		}
 
-		this.mouseDown = event;
+		this.mouseDown.push(event);
 
 		if (!self.emit('preMouseDown', [event, mx, my, event.button + 1, event.pointerId])) {
 			this.queueEvent(this, function () {
@@ -386,7 +391,7 @@ var IgeInputComponent = IgeEventingClass.extend({
 			this._state[this.mouse.button3] = false;
 		}
 
-		this.mouseUp = event;
+		this.mouseUp.push(event);
 		
 		if (!self.emit('preMouseUp', [event, mx, my, event.button + 1, event.pointerId])) {
 			this.queueEvent(this, function () {
@@ -663,9 +668,9 @@ var IgeInputComponent = IgeEventingClass.extend({
 		this._eventQueue = [];
 		this._eventControl._cancelled = false;
 		this.dblClick = false; // TODO: Add double-click event handling
+		this.mouseDown = [];
+		this.mouseUp = [];
 		this.mouseMove = false;
-		this.mouseDown = false;
-		this.mouseUp = false;
 		this.mouseWheel = false;
 	},
 

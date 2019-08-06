@@ -2481,19 +2481,28 @@ var IgeEntity = IgeObject.extend({
 	 * should be fired.
 	 * @private
 	 */
-	_handleMouseUp: function (event, evc, data) {
-		// Reset the mouse-down flag
-		this._mouseStateDown = false;
-		if (this._mouseUp) { this._mouseUp(event, evc, data); }
-		
-		/**
-		 * Fires when a mouse up occurs on the entity.
-		 * @event IgeEntity#mouseUp
-		 * @param {Object} The DOM event object.
-		 * @param {Object} The IGE event control object.
-		 * @param {*} Any further event data.
-		 */
-		this.emit('mouseUp', [event, evc, data]);
+	_handleMouseUp: function (events, evc, data) {
+		var arrCount = events.length,
+			arrIndex,
+			event; // We set this to true by default
+
+		// Loop the events array
+		for (arrIndex = 0; arrIndex < arrCount; arrIndex++) {
+			event = events[arrIndex];
+			
+			if (this._mouseUp) {
+				this._mouseUp(event, evc, data);
+			}
+
+			/**
+			 * Fires when a mouse up occurs on the entity.
+			 * @event IgeEntity#mouseUp
+			 * @param {Object} The DOM event object.
+			 * @param {Object} The IGE event control object.
+			 * @param {*} Any further event data.
+			 */
+			this.emit('mouseUp', [event, evc, data]);
+		}
 	},
 
 	/**
@@ -2501,11 +2510,17 @@ var IgeEntity = IgeObject.extend({
 	 * should be fired.
 	 * @private
 	 */
-	_handleMouseDown: function (event, evc, data) {
-		if (!this._mouseStateDown) {
-			this._mouseStateDown = true;
+	_handleMouseDown: function (events, evc, data) {
+		var arrCount = events.length,
+			arrIndex,
+			event; // We set this to true by default
+
+		// Loop the events array
+		for (arrIndex = 0; arrIndex < arrCount; arrIndex++) {
+			event = events[arrIndex];
+
 			if (this._mouseDown) { this._mouseDown(event, evc, data); }
-			
+
 			/**
 			 * Fires when a mouse down occurs on the entity.
 			 * @event IgeEntity#mouseDown
@@ -2532,12 +2547,12 @@ var IgeEntity = IgeObject.extend({
 			this._handleMouseIn(ige.input.mouseMove, evc, data);
 		}
 
-		if (ige.input.mouseDown) {
+		if (ige.input.mouseDown.length > 0) {
 			// There is a mouse down event
 			this._handleMouseDown(ige.input.mouseDown, evc, data);
 		}
 
-		if (ige.input.mouseUp) {
+		if (ige.input.mouseUp.length > 0) {
 			// There is a mouse up event
 			this._handleMouseUp(ige.input.mouseUp, evc, data);
 		}

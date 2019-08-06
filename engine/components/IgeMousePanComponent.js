@@ -19,6 +19,7 @@ var IgeMousePanComponent = IgeEventingClass.extend({
         // Set the pan component to inactive to start with
         this._enabled = false;
         this._startThreshold = 5; // The number of pixels the mouse should move to activate a pan
+        this._pointers = [];
     },
 
     /**
@@ -102,7 +103,10 @@ var IgeMousePanComponent = IgeEventingClass.extend({
      * @private
      */
     _mouseDown: function (event) {
-        if (!this._panStarted && this._enabled && event.igeViewport.id() === this._entity.id()) {
+        var pointer = event.pointerId || true;
+        this._pointers.push(pointer);
+
+        if (!this._panPreStart && !this._panStarted && this._enabled && event.igeViewport.id() === this._entity.id()) {
             // Record the mouse down position - pan pre-start
             var curMousePos = ige._mousePos;
             this._panStartMouse = curMousePos.clone();
@@ -112,7 +116,7 @@ var IgeMousePanComponent = IgeEventingClass.extend({
                 y: this._entity.camera._translate.y
             };
 
-            this._panPreStart = true;
+            this._panPreStart = pointer;
             this._panStarted = false;
         }
     },
@@ -124,9 +128,11 @@ var IgeMousePanComponent = IgeEventingClass.extend({
      * @private
      */
     _mouseMove: function (event) {
+        var pointer = event.pointerId || true;
+
         if (this._enabled) {
-            // Pan the camera if the mouse is down
-            if (this._panStartMouse) {
+            // Pan the camera if only one pointer is down, if there's more it's probably a pinch zoom
+            if (this._panStartMouse && this._pointers.length === 1) {
                 var curMousePos = ige._mousePos,
                     panCords = {
                         x: this._panStartMouse.x - curMousePos.x,
@@ -157,21 +163,7 @@ var IgeMousePanComponent = IgeEventingClass.extend({
                     }
                 }
 
-                if (this._panPreStart) {
-                    // Check if we've reached the start threshold
-                    if (distX > this._startThreshold || distY > this._startThreshold) {
-                        this._entity.camera.translateTo(
-                            panFinalX,
-                            panFinalY,
-                            0
-                        );
-                        this.emit('panStart');
-                        this._panPreStart = false;
-                        this._panStarted = true;
-
-                        this.emit('panMove');
-                    }
-                } else {
+                if (this._panStarted === pointer) {
                     // Pan has already started
                     this._entity.camera.translateTo(
                         panFinalX,
@@ -180,6 +172,19 @@ var IgeMousePanComponent = IgeEventingClass.extend({
                     );
 
                     this.emit('panMove');
+                }
+
+                if (this._panPreStart === pointer) {
+                    // Check if we've reached the start threshold
+                    if (distX > this._startThreshold || distY > this._startThreshold) {
+                        this._entity.camera.translateTo(panFinalX, panFinalY,0);
+
+                        this.emit('panStart');
+                        this._panPreStart = false;
+                        this._panStarted = pointer;
+
+                        this.emit('panMove');
+                    }
                 }
             }
         }
@@ -192,9 +197,18 @@ var IgeMousePanComponent = IgeEventingClass.extend({
      * @private
      */
     _mouseUp: function (event) {
+        var pointer = event.pointerId || true;
+        this._pointers = this._pointers.filter(p => p !== pointer);
+
         if (this._enabled) {
+            if (this._panPreStart === pointer) {
+                delete this._panStartMouse;
+                delete this._panStartCamera;
+                this._panPreStart = false;
+            }
+
             // End the pan
-            if (this._panStarted) {
+            if (this._panStarted === pointer) {
                 if (this._panStartMouse) {
                     var curMousePos = ige._mousePos,
                         panCords = {
@@ -239,10 +253,6 @@ var IgeMousePanComponent = IgeEventingClass.extend({
                     this.emit('panEnd');
                     this._panStarted = false;
                 }
-            } else {
-                delete this._panStartMouse;
-                delete this._panStartCamera;
-                this._panStarted = false;
             }
         }
     }
